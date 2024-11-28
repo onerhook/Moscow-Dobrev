@@ -1,4 +1,4 @@
-def main():
+def first.py():
     print('My first git-repo')
 
 
