@@ -1,18 +1,15 @@
 import sys
 import random
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton
+from PyQt6.QtWidgets import QApplication, QMainWindow
 from PyQt6.QtGui import QPainter, QColor
 from PyQt6.QtCore import QRectF
-from UI import Ui_MainWindow  # Импортируем сгенерированный класс интерфейса
+from PyQt6.uic import loadUi
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-
-        # Кнопка для добавления окружностей
-        self.ui.pushButton.clicked.connect(self.add_circle)
+        loadUi("UI.ui", self)
+        self.pushButton.clicked.connect(self.add_circle)
         self.circles = []
 
     def add_circle(self):
