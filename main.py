@@ -1,47 +1,35 @@
 import sys
-import random
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QWidget
-from PyQt6.QtGui import QPainter, QColor
-from PyQt6.QtCore import QRectF
+import sqlite3
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
+from PyQt6.uic import loadUi
 
-class Ui_MainWindow:
-    def setupUi(self, MainWindow):
-        MainWindow.setWindowTitle("Random Circles")
-        MainWindow.setGeometry(100, 100, 600, 400)
-        self.centralwidget = QWidget(MainWindow)
-        self.pushButton = QPushButton("Add Circle", self.centralwidget)
-        self.pushButton.setGeometry(10, 10, 100, 30)
-        MainWindow.setCentralWidget(self.centralwidget)
-
-class MainWindow(QMainWindow):
+class CoffeeApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.ui = Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.ui.pushButton.clicked.connect(self.add_circle)
-        self.circles = []
+        loadUi("main.ui", self)
+        self.load_data()
+        self.refreshButton.clicked.connect(self.load_data)
 
-    def add_circle(self):
-        diameter = random.randint(20, 100)
-        x = random.randint(50, self.width() - 100)
-        y = random.randint(50, self.height() - 100)
-        color = QColor(
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255)
-        )
-        self.circles.append((x, y, diameter, color))
-        self.update()
+    def load_data(self):
+        connection = sqlite3.connect("coffee.sqlite")
+        cursor = connection.cursor()
+        query = "SELECT * FROM coffee"
+        results = cursor.execute(query).fetchall()
+        connection.close()
 
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        for x, y, diameter, color in self.circles:
-            painter.setBrush(color)
-            painter.setPen(QColor("black"))
-            painter.drawEllipse(QRectF(x, y, diameter, diameter))
+        self.tableWidget.setRowCount(len(results))
+        self.tableWidget.setColumnCount(6)
+        self.tableWidget.setHorizontalHeaderLabels([
+            "ID", "Название", "Степень обжарки", "Молотый/в зернах",
+            "Описание вкуса", "Цена", "Объем"
+        ])
+
+        for row_index, row_data in enumerate(results):
+            for column_index, cell_data in enumerate(row_data):
+                self.tableWidget.setItem(row_index, column_index, QTableWidgetItem(str(cell_data)))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = CoffeeApp()
     window.show()
     sys.exit(app.exec())
